@@ -80,6 +80,35 @@ const getUserService = async () => {
     }
 }
 
+const forgotPasswordService = async (email, newPassword) => {
+    try {
+        const user = await User.findOne({ email: email });
+        if (!user) {
+            return {
+                EC: 1,
+                EM: "Email không tồn tại trong hệ thống"
+            }
+        }
+
+        const hashPassword = await bcrypt.hash(newPassword, saltRounds);
+        await User.updateOne(
+            { email: email },
+            { password: hashPassword }
+        );
+
+        return {
+            EC: 0,
+            EM: "Đặt lại mật khẩu thành công"
+        };
+    } catch (error) {
+        console.log(error);
+        return {
+            EC: 2,
+            EM: "Có lỗi xảy ra khi đặt lại mật khẩu"
+        };
+    }
+}
+
 module.exports = {
-    createUserService, loginService, getUserService
+    createUserService, loginService, getUserService, forgotPasswordService
 }
