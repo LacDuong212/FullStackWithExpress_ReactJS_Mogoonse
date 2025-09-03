@@ -14,6 +14,8 @@ import HomePage from './pages/home.jsx';
 import LoginPage from './pages/login.jsx';
 import ForgotPasswordPage from './pages/forgotPassword.jsx';
 import { AuthWrapper } from './components/context/auth.context.jsx';
+import ProductLazyLoad from './pages/productLazyLoad.jsx';
+import ProductPagination from './pages/productPagination.jsx';
 
 const router = createBrowserRouter([
     {
@@ -42,6 +44,14 @@ const router = createBrowserRouter([
         path: "forgot-password",
         element: <ForgotPasswordPage />,
     },
+    {
+        path: "product-lazy",
+        element: <ProductLazyLoad />,
+    },
+    {
+        path: "product-pagination",
+        element: <ProductPagination />,
+    }
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')).render(

@@ -1,7 +1,7 @@
 import React, {useContext, useState} from "react";
 import {Link, useNavigate} from "react-router-dom";
 import {AuthContext} from "../context/auth.context.jsx";
-import {HomeOutlined, SettingOutlined, UsergroupAddOutlined} from "@ant-design/icons";
+import {HomeOutlined, SettingOutlined, UsergroupAddOutlined, AppstoreOutlined} from "@ant-design/icons";
 import {Menu} from "antd";
 
 const Header = () => {
@@ -14,6 +14,16 @@ const Header = () => {
             label: <Link to={"/"}>Home Page</Link>,
             key: "home",
             icon: <HomeOutlined />
+        },
+        {
+            label: <Link to={"/product-pagination"}>Products Pagination</Link>,
+            key: "productsPagi",
+            icon: <AppstoreOutlined />
+        },
+        {
+            label: <Link to={"/product-lazy"}>Products Lazy Loading</Link>,
+            key: "productsLazy",
+            icon: <AppstoreOutlined />
         },
         ...(auth.isAuthenticated ? [{
             label: <Link to={"/user"}>Users</Link>,

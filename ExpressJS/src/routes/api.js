@@ -2,8 +2,11 @@ const express = require('express');
 const { createUser, handleLogin, getUser, getAccount, handleForgotPassword } = require('../controllers/userController');
 const auth = require('../middleware/auth');
 const delay = require('../middleware/delay');
+const { getAllProducts } = require("../controllers/productController");
 
 const routerAPI = express.Router();
+
+routerAPI.get("/product", getAllProducts);
 
 routerAPI.use(auth);
 

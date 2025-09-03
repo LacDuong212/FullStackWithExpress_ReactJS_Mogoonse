@@ -30,6 +30,14 @@ const forgotPasswordApi = (email, newPassword) => {
     return axios.post(URL_API, data);
 }
 
+const getProductsApi = (category, page = 1, limit = 10) => {
+    let URL_API = `/v1/api/product?page=${page}&limit=${limit}`;
+    if (category && category.trim() !== "") {
+        URL_API += `&category=${encodeURIComponent(category)}`;
+    }
+    return axios.get(URL_API);
+};
+
 export {
-    createUserApi, loginApi, getUserApi, forgotPasswordApi
+    createUserApi, loginApi, getUserApi, forgotPasswordApi, getProductsApi
 }
