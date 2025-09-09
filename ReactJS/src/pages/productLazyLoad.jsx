@@ -1,29 +1,54 @@
 import { useEffect, useState } from "react";
-import { notification, Card, Spin, Select } from "antd";
+import { notification, Card, Spin, Select, Input, Button } from "antd";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { getProductsApi } from "../utils/api.js";
+import { searchProductsApi } from "../utils/api.js";
 
 const { Option } = Select;
 
 const ProductLazyLoad = () => {
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [category, setCategory] = useState("");
-  const [limit, setLimit] = useState(5);
+  const [hasMore, setHasMore] = useState(true);
 
-  const fetchProducts = async (pageNum = 1, pageSize = limit) => {
+  const [category, setCategory] = useState("");
+  const [keyword, setKeyword] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [priceRange, setPriceRange] = useState("");
+  const [sortPrice, setSortPrice] = useState("");
+
+  const PAGE_SIZE = 5;
+
+  const fetchProducts = async (reset = false) => {
+    if (loading) return;
     setLoading(true);
+
     try {
-      const res = await getProductsApi(category || null, pageNum, pageSize);
+      const res = await searchProductsApi({
+        keyword: keyword || "",
+        category,
+        priceRange,
+        sortPrice,
+        page: reset ? 1 : page,
+        limit: PAGE_SIZE,
+      });
+
       if (res.success) {
-        if (pageNum === 1) {
-          setProducts(res.data.products);
+        const data = res.data.products || [];
+        if (reset) {
+          setProducts(data);
+          setPage(2);
         } else {
-          setProducts((prev) => [...prev, ...res.data.products]);
+          setProducts((prev) => [...prev, ...data]);
+          setPage((prev) => prev + 1);
         }
-        setTotalPages(res.data.pagination.totalPages);
+
+        // nếu ít hơn PAGE_SIZE thì hết sản phẩm
+        if (data.length < PAGE_SIZE) {
+          setHasMore(false);
+        } else {
+          setHasMore(true);
+        }
       } else {
         notification.error({
           message: "Error",
@@ -39,20 +64,35 @@ const ProductLazyLoad = () => {
     setLoading(false);
   };
 
+  // gọi lại khi filter/search thay đổi
   useEffect(() => {
-    setPage(1);
-    fetchProducts(1, limit);
-  }, [category, limit]);
+    fetchProducts(true);
+  }, [category, keyword, priceRange, sortPrice]);
 
-  useEffect(() => {
-    if (page > 1) fetchProducts(page, limit);
-  }, [page]);
+  const handleSearch = () => {
+    setPage(1);
+    fetchProducts(true);
+  };
 
   return (
     <div style={{ padding: 20 }}>
-      <h2>Sản phẩm (Lazy Loading)</h2>
+      <h2>Sản phẩm (Lazy Loading + Search + Filter)</h2>
 
-      <div style={{ display: "flex", gap: 20, marginBottom: 20 }}>
+      {/* Filter bar */}
+      <div style={{ display: "flex", gap: 20, flexWrap: "wrap", marginBottom: 20 }}>
+        <div>
+          <Input
+            placeholder="Tìm sản phẩm..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            style={{ width: 200 }}
+            onPressEnter={handleSearch}
+          />
+          <Button type="primary" onClick={() => setKeyword(searchInput)} style={{ marginLeft: 8 }}>
+            Tìm
+          </Button>
+        </div>
+
         <div>
           <span>Chọn category: </span>
           <Select value={category} style={{ width: 200 }} onChange={setCategory}>
@@ -64,19 +104,32 @@ const ProductLazyLoad = () => {
         </div>
 
         <div>
-          <span>Số sản phẩm mỗi lần tải: </span>
-          <Select value={limit} style={{ width: 100 }} onChange={setLimit}>
-            <Option value={5}>5</Option>
-            <Option value={10}>10</Option>
-            <Option value={20}>20</Option>
+          <span>Lọc theo giá: </span>
+          <Select value={priceRange} style={{ width: 150 }} onChange={setPriceRange}>
+            <Option value="">Tất cả</Option>
+            <Option value="100">Dưới 100.000</Option>
+            <Option value="200">Dưới 200.000</Option>
+            <Option value="500">Dưới 500.000</Option>
+            <Option value="1000">Dưới 1.000.000</Option>
+            <Option value="2000">Dưới 2.000.000</Option>
+          </Select>
+        </div>
+
+        <div>
+          <span>Sắp xếp giá: </span>
+          <Select value={sortPrice} style={{ width: 150 }} onChange={setSortPrice}>
+            <Option value="">Mặc định</Option>
+            <Option value="asc">Thấp → Cao</Option>
+            <Option value="desc">Cao → Thấp</Option>
           </Select>
         </div>
       </div>
 
+      {/* Infinite scroll */}
       <InfiniteScroll
         dataLength={products.length}
-        next={() => setPage((prev) => prev + 1)}
-        hasMore={page < totalPages}
+        next={() => fetchProducts(false)}
+        hasMore={hasMore}
         loader={
           <div style={{ textAlign: "center", margin: 20 }}>
             <Spin size="large" />
@@ -87,12 +140,17 @@ const ProductLazyLoad = () => {
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
           {products.map((p) => (
             <Card
-              key={p._id}
-              cover={<img src={p.image} alt={p.name} style={{ height: 200, objectFit: "cover" }} />}
+              key={p.id || p._id}
+              cover={
+                <img src={p.image} alt={p.name} style={{ height: 200, objectFit: "cover" }} />
+              }
               bordered
               style={{ width: "90%", maxWidth: 400 }}
             >
-              <Card.Meta title={p.name} description={`${Number(p.price).toLocaleString()} VND`} />
+              <Card.Meta
+                title={p.name}
+                description={`${Number(p.price).toLocaleString()} VND`}
+              />
             </Card>
           ))}
         </div>
