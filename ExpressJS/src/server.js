@@ -6,6 +6,7 @@ const apiRoutes = require('./routes/api');
 const connection = require('./config/database');
 const { getHomepage } = require('./controllers/homeController');
 const cors = require('cors');
+const syncProducts = require("./utils/syncProducts");
 
 const app = express();
 
@@ -21,12 +22,16 @@ app.use('/', webAPI);
 
 app.use('/v1/api/', apiRoutes);
 (async () => {
-    try {
-        await connection();
-        app.listen(port, () => {
-            console.log(`Backend Nodejs APP listening on port ${port}`)
-        })
-    } catch (error) {
-        console.log(">>> Error connect to DB", error);
-    }
-})()
+  try {
+    await connection();
+
+    // ✅ Gọi sync sản phẩm sang Elasticsearch sau khi kết nối DB
+    await syncProducts();
+
+    app.listen(port, () => {
+      console.log(`Backend Nodejs APP listening on port ${port}`);
+    });
+  } catch (error) {
+    console.log(">>> Error connect to DB", error);
+  }
+})();

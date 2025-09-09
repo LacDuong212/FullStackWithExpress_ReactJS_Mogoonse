@@ -3,10 +3,13 @@ const { createUser, handleLogin, getUser, getAccount, handleForgotPassword } = r
 const auth = require('../middleware/auth');
 const delay = require('../middleware/delay');
 const { getAllProducts } = require("../controllers/productController");
+const { search } = require("../controllers/searchController");
 
 const routerAPI = express.Router();
 
 routerAPI.get("/product", getAllProducts);
+routerAPI.get("/search", search);
+
 
 routerAPI.use(auth);
 
