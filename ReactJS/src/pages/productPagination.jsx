@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { notification, Card, Spin, Select, Pagination, Input, Button } from "antd";
-import { getProductsApi, searchProductsApi } from "../utils/api.js";
+import { searchProductsApi } from "../utils/api.js";
 
 const { Option } = Select;
 
@@ -21,8 +21,8 @@ const ProductPagination = () => {
   const fetchProducts = async (pageNum = 1) => {
     setLoading(true);
     try {
-        const res = await searchProductsApi({
-        keyword: keyword || "", // để trống nếu chưa search
+      const res = await searchProductsApi({
+        keyword: keyword || "",
         category,
         priceRange,
         sortPrice,
@@ -33,10 +33,13 @@ const ProductPagination = () => {
       if (res.success) {
         const data = res.data;
         setProducts(data.products || []);
+        setTotalItems(data.pagination?.totalItems || 0);
         setTotalPages(data.pagination?.totalPages || 1);
-        setTotalItems(data.pagination?.totalItems || (data.products?.length || 0));
       } else {
-        notification.error({ message: "Error", description: res.message || "Không tải được sản phẩm" });
+        notification.error({
+          message: "Error",
+          description: res.message || "Không tải được sản phẩm",
+        });
       }
     } catch (e) {
       notification.error({ message: "Error", description: e.message });
@@ -44,13 +47,11 @@ const ProductPagination = () => {
     setLoading(false);
   };
 
-  // Khi thay đổi filter/search/limit → reset page 1
   useEffect(() => {
     setPage(1);
     fetchProducts(1);
   }, [category, limit, keyword, priceRange, sortPrice]);
 
-  // Khi đổi page
   useEffect(() => {
     fetchProducts(page);
   }, [page]);
@@ -61,8 +62,8 @@ const ProductPagination = () => {
     <div style={{ padding: 20 }}>
       <h2>Sản phẩm (Pagination + Search + Filter)</h2>
 
+      {/* Bộ lọc và search */}
       <div style={{ display: "flex", gap: 20, flexWrap: "wrap", marginBottom: 20 }}>
-        {/* Search input */}
         <div>
           <Input
             placeholder="Tìm sản phẩm..."
@@ -76,7 +77,6 @@ const ProductPagination = () => {
           </Button>
         </div>
 
-        {/* Category filter */}
         <div>
           <span>Chọn category: </span>
           <Select value={category} style={{ width: 200 }} onChange={setCategory}>
@@ -87,7 +87,6 @@ const ProductPagination = () => {
           </Select>
         </div>
 
-        {/* Price filter */}
         <div>
           <span>Lọc theo giá: </span>
           <Select value={priceRange} style={{ width: 150 }} onChange={setPriceRange}>
@@ -100,7 +99,6 @@ const ProductPagination = () => {
           </Select>
         </div>
 
-        {/* Sort price */}
         <div>
           <span>Sắp xếp giá: </span>
           <Select value={sortPrice} style={{ width: 150 }} onChange={setSortPrice}>
@@ -110,7 +108,6 @@ const ProductPagination = () => {
           </Select>
         </div>
 
-        {/* Limit per page */}
         <div>
           <span>Số sản phẩm mỗi trang: </span>
           <Select value={limit} style={{ width: 100 }} onChange={setLimit}>
@@ -121,7 +118,7 @@ const ProductPagination = () => {
         </div>
       </div>
 
-      {/* Product list */}
+      {/* Danh sách sản phẩm */}
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
         {products.length > 0 ? (
           products.map((p) => (
@@ -139,7 +136,6 @@ const ProductPagination = () => {
         )}
       </div>
 
-      {/* Loading */}
       {loading && (
         <div style={{ textAlign: "center", marginTop: 20 }}>
           <Spin size="large" />
@@ -147,14 +143,18 @@ const ProductPagination = () => {
       )}
 
       {/* Pagination */}
-      <Pagination
-        style={{ marginTop: 20, textAlign: "center" }}
-        current={page}
-        total={totalItems}
-        pageSize={limit}
-        onChange={setPage}
-        showSizeChanger={false}
-      />
+      <div style={{ marginTop: 20, textAlign: "center" }}>
+        <Pagination
+          current={page}
+          total={totalItems}
+          pageSize={limit}
+          onChange={setPage}
+          showSizeChanger={false}
+        />
+        <p style={{ marginTop: 8 }}>
+          Trang {page}/{totalPages}
+        </p>
+      </div>
     </div>
   );
 };

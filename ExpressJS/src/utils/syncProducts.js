@@ -10,10 +10,10 @@ const createIndexIfNotExists = async () => {
       body: {
         mappings: {
           properties: {
-            name: { type: "text" },          // cho phép search fuzzy
-            category: { type: "keyword" },   // filter theo category
-            price: { type: "float" },        // filter / sort theo giá
-            image: { type: "text", index: false } // chỉ lưu, không cần search
+            name: { type: "text" },
+            category: { type: "keyword" },
+            price: { type: "float" },
+            image: { type: "text", index: false }
           }
         }
       }
