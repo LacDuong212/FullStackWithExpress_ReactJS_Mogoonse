@@ -16,6 +16,9 @@ import ForgotPasswordPage from './pages/forgotPassword.jsx';
 import { AuthWrapper } from './components/context/auth.context.jsx';
 import ProductLazyLoad from './pages/productLazyLoad.jsx';
 import ProductPagination from './pages/productPagination.jsx';
+import FavoriteProducts from './pages/FavoriteProducts.jsx';
+import ViewedProducts from './pages/ViewedProducts.jsx';
+import ProductDetail from './components/product/ProductDetail.jsx';
 
 const router = createBrowserRouter([
     {
@@ -29,6 +32,18 @@ const router = createBrowserRouter([
             {
                 path: "user",
                 element: <UserPage />,
+            },
+            {
+                path: "favorites",
+                element: <FavoriteProducts />,
+            },
+            {
+                path: "viewed",
+                element: <ViewedProducts />,
+            },
+            {
+                path: "product/:id",
+                element: <ProductDetail />,
             },
         ],
     },

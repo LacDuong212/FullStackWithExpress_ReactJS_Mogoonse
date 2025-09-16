@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { notification, Card, Spin, Select, Input, Button } from "antd";
+import { useNavigate } from "react-router-dom";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { searchProductsApi } from "../utils/api.js";
 
 const { Option } = Select;
 
 const ProductLazyLoad = () => {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -72,6 +74,13 @@ const ProductLazyLoad = () => {
   const handleSearch = () => {
     setPage(1);
     fetchProducts(true);
+  };
+
+  const handleProductClick = (product) => {
+    const productId = product._id || product.id;
+    if (productId) {
+      navigate(`/product/${productId}`);
+    }
   };
 
   return (
@@ -145,7 +154,9 @@ const ProductLazyLoad = () => {
                 <img src={p.image} alt={p.name} style={{ height: 200, objectFit: "cover" }} />
               }
               bordered
-              style={{ width: "90%", maxWidth: 400 }}
+              hoverable
+              style={{ width: "90%", maxWidth: 400, cursor: "pointer" }}
+              onClick={() => handleProductClick(p)}
             >
               <Card.Meta
                 title={p.name}

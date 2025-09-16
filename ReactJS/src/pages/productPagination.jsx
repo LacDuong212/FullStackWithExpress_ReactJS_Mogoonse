@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { notification, Card, Spin, Select, Pagination, Input, Button } from "antd";
+import { useNavigate } from "react-router-dom";
 import { searchProductsApi } from "../utils/api.js";
 
 const { Option } = Select;
 
 const ProductPagination = () => {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -57,6 +59,13 @@ const ProductPagination = () => {
   }, [page]);
 
   const handleSearch = () => setKeyword(searchInput);
+
+  const handleProductClick = (product) => {
+    const productId = product._id || product.id;
+    if (productId) {
+      navigate(`/product/${productId}`);
+    }
+  };
 
   return (
     <div style={{ padding: 20 }}>
@@ -126,7 +135,9 @@ const ProductPagination = () => {
               key={p.id || p._id}
               cover={<img src={p.image} alt={p.name} style={{ height: 200, objectFit: "cover" }} />}
               bordered
-              style={{ width: "90%", maxWidth: 400 }}
+              hoverable
+              style={{ width: "90%", maxWidth: 400, cursor: "pointer" }}
+              onClick={() => handleProductClick(p)}
             >
               <Card.Meta title={p.name} description={`${Number(p.price).toLocaleString()} VND`} />
             </Card>
